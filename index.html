@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Flores para ti</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: black;
+      font-family: Arial, sans-serif;
+      color: yellow;
+      text-align: center;
+    }
+
+    /* Globos */
+    .globos {
+      position: absolute;
+      top: 20px;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+    }
+
+    .globo {
+      width: 70px;
+      height: 100px;
+      background: gold;
+      border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 30px;
+      font-weight: bold;
+      color: white;
+      text-shadow: 0 0 5px black;
+      position: relative;
+      animation: flotar 4s infinite ease-in-out;
+    }
+
+    .globo:nth-child(2) { background: white; color: gold; }
+    .globo:nth-child(3) { background: gold; }
+    .globo:nth-child(4) { background: white; color: gold; }
+
+    .globo::after {
+      content: "";
+      position: absolute;
+      bottom: -20px;
+      left: 50%;
+      width: 2px;
+      height: 30px;
+      background: white;
+      transform: translateX(-50%);
+    }
+
+    @keyframes flotar {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-15px); }
+    }
+
+    /* Texto */
+    .texto {
+      position: absolute;
+      top: 150px;
+      width: 100%;
+      text-align: center;
+      color: #FFD700;
+      font-weight: bold;
+      text-shadow: 0 0 10px #fff, 0 0 20px #FFD700;
+    }
+
+    .texto h2 {
+      font-size: 40px;
+      margin: 5px 0;
+    }
+
+    .texto h3 {
+      font-size: 55px;
+      margin: 10px 0;
+      color: #ffcc00;
+    }
+
+    /* Flores */
+    .flores {
+      position: absolute;
+      bottom: 50px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .flores img {
+      width: 250px;
+      animation: bounce 2s infinite ease-in-out;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-15px); }
+    }
+
+    /* Canvas para fuegos artificiales */
+    canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: -1;
+    }
+  </style>
+</head>
+<body>
+  <!-- Globos con LOVE -->
+  <div class="globos">
+    <div class="globo">L</div>
+    <div class="globo">O</div>
+    <div class="globo">V</div>
+    <div class="globo">E</div>
+  </div>
+
+  <!-- Texto -->
+  <div class="texto">
+    <h2>Flores para ti</h2>
+    <h3>TE AMO </br> SARITA</h3>
+  </div>
+
+  <!-- Imagen de girasoles -->
+  <div class="flores">
+    <img src="amarillas.jpg" alt="Ramo de girasoles">
+  </div>
+
+  <!-- Fuegos artificiales -->
+  <canvas id="canvas"></canvas>
+
+  <script>
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    class Firework {
+      constructor(x, y, colors) {
+        this.x = x;
+        this.y = y;
+        this.colors = colors;
+        this.particles = [];
+        for (let i = 0; i < 100; i++) {
+          const angle = Math.random() * 2 * Math.PI;
+          const speed = Math.random() * 5 + 2;
+          this.particles.push({
+            x: this.x,
+            y: this.y,
+            vx: Math.cos(angle) * speed,
+            vy: Math.sin(angle) * speed,
+            alpha: 1
+          });
+        }
+      }
+
+      update() {
+        this.particles.forEach(p => {
+          p.x += p.vx;
+          p.y += p.vy;
+          p.vy += 0.02;
+          p.alpha -= 0.01;
+        });
+      }
+
+      draw() {
+        this.particles.forEach(p => {
+          ctx.fillStyle = `rgba(${this.colors},${p.alpha})`;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, 2, 0, Math.PI * 2);
+          ctx.fill();
+        });
+      }
+    }
+
+    let fireworks = [];
+
+    function animate() {
+      ctx.fillStyle = "rgba(0,0,0,0.2)";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      fireworks.forEach((fw, index) => {
+        fw.update();
+        fw.draw();
+        if (fw.particles.every(p => p.alpha <= 0)) {
+          fireworks.splice(index, 1);
+        }
+      });
+      requestAnimationFrame(animate);
+    }
+
+    setInterval(() => {
+      const x = Math.random() * canvas.width;
+      const y = Math.random() * canvas.height / 2;
+      const colors = `${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)}`;
+      fireworks.push(new Firework(x, y, colors));
+    }, 1000);
+
+    animate();
+
+    window.addEventListener("resize", () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    });
+  </script>
+</body>
+</html>
